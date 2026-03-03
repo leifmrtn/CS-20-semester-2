@@ -60,16 +60,13 @@ public class exercise8_hi_lo_game {
 							System.out.println("You now have " + points + " points.");		
 							System.out.println("Would you like to play again? (1=Yes, 0=No)");
 							run = in.nextInt(); 
-						}
-	
+						}	
 					}								
 				}
 				else {//not enough money for that bet
 					System.out.println("I'm sorry but you don't have enough money for that bet.");
 					bet = 0;
-				}
-				
-
+				}				
 				
 				if(run == 0) {
 					System.out.println("Thanks for playing!");
