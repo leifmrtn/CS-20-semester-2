@@ -1,3 +1,14 @@
+/*
+
+Program: exercise9_gameOfNim.java          Last Date of this Revision: March 12, 2026
+
+Purpose: User goes against computer, each can draw 1-3 stones and the last one to take a stone loses
+
+Author: Leif Martin, 
+School: CHHS
+Course: Computer Programming 20-1
+
+*/
 package Mastery;
 
 import java.util.Scanner;
@@ -75,23 +86,25 @@ public class exercise9_gameOfNim {
 		}	
 	}
 }
-//---+ console +---//
-//+========================================================+
-//|               Welcome to the Game Of Nim.              |
-//|You can take 1-3 stones, last one to take a stone loses.|
-//+========================================================+
-//There are 19 left, How many would you like to take?: 3
-//There are 16 the computer takes 1 stones.
-//There are 15 left, How many would you like to take?: 3
-//There are 12 the computer takes 1 stones.
-//There are 11 left, How many would you like to take?: 4
-//That move did not work
-//There are 11 left, How many would you like to take?: 3
-//There are 8 the computer takes 2 stones.
-//There are 6 left, How many would you like to take?: 1
-//There are 5 the computer takes 2 stones.
-//There are 3 left, How many would you like to take?: 2
-//There are 1 the computer takes 1 stones.
-//The game ended
-//You won
 
+
+/* Screen Dump
++========================================================+
+|               Welcome to the Game Of Nim.              |
+|You can take 1-3 stones, last one to take a stone loses.|
++========================================================+
+There are 19 left, How many would you like to take?: 3
+There are 16 the computer takes 1 stones.
+There are 15 left, How many would you like to take?: 3
+There are 12 the computer takes 1 stones.
+There are 11 left, How many would you like to take?: 4
+That move did not work
+There are 11 left, How many would you like to take?: 3
+There are 8 the computer takes 2 stones.
+There are 6 left, How many would you like to take?: 1
+There are 5 the computer takes 2 stones.
+There are 3 left, How many would you like to take?: 2
+There are 1 the computer takes 1 stones.
+The game ended
+You won
+*/

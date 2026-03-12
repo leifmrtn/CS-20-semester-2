@@ -1,3 +1,15 @@
+/*
+
+Program: exercise8_hi_lo_game.java          Last Date of this Revision: March 12, 2026
+
+Purpose: Generate a random number from 1 - 20 and then get the user to input a bet and guess for whether the number will be high or low
+
+Author: Leif Martin, 
+School: CHHS
+Course: Computer Programming 20-1
+
+*/
+
 package Mastery;
 
 import java.util.Random;
@@ -18,7 +30,7 @@ public class exercise8_hi_lo_game {
 		//starting board
 		System.out.println("High Low Game");
 		System.out.println("");
-		System.out.println("Numbers: 1-6 are low, 7-13 are high.");
+		System.out.println("Numbers: 1-10 are low, 11-20 are high.");
 		System.out.println("You have " + points + " points.");
 		try(Scanner in = new Scanner(System.in)) {
 			while (running) {
@@ -31,8 +43,8 @@ public class exercise8_hi_lo_game {
 					predict = in.nextInt();
 					
 					Random random = new Random();
-					number = random.nextInt(12)+1;
-					if(number >= 7) {//number is high
+					number = random.nextInt(19)+1;
+					if(number >= 11) {//number is high
 						numHiLo = 1;
 					}
 					else {
@@ -76,32 +88,31 @@ public class exercise8_hi_lo_game {
 			}
 
 		}
-				bet = 0;
-							
+				bet = 0;					
 	}
 }
 
+/* Screen Dump
+High Low Game
 
-//---console---//
-//High Low Game
-
-//Numbers: 1-6 are low, 7-13 are high.
-//You have 500 points.
-//Enter points to risk: 250
-//Predict (1=high, 0=low) 
-//1
-//The number was 7
-//You won 250
-//You now have 750 points.
-//Would you like to play again? (1=Yes, 0=No)
-//1
-//Enter points to risk: 500
-//Predict (1=high, 0=low) 
-//1
-//The number was 11
-//You won 500
-//You now have 1250 points.
-//Would you like to play again? (1=Yes, 0=No)
-//0
-//Thanks for playing!
-//You finished with 1250 points
+Numbers: 1-10 are low, 11-20 are high.
+You have 500 points.
+Enter points to risk: 250
+Predict (1=high, 0=low) 
+1
+The number was 14
+You won 250
+You now have 750 points.
+Would you like to play again? (1=Yes, 0=No)
+1
+Enter points to risk: 500
+Predict (1=high, 0=low) 
+1
+The number was 11
+You won 500
+You now have 1250 points.
+Would you like to play again? (1=Yes, 0=No)
+0
+Thanks for playing!
+You finished with 1250 points
+*/
