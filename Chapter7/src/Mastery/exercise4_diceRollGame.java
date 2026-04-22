@@ -1,111 +1,118 @@
+/*
+
+Program: exercise4_diceRol1Game.java          Last Date of this Revision: April 20, 2026
+
+Purpose: Dice Roll Game - get the user to roll a dice make a bet and then call whether it will be < or > 7, (with 7 being a loss) 
+
+Author: Leif Martin, 
+School: CHHS
+Course: Computer Programming 20-1
+
+*/
+
 package Mastery;
 
 import java.util.Random;
 import java.util.Scanner;
 
-public class exercise4_diceRollGame {
-private static int points = 1000;
-
-static Scanner in = new Scanner(System.in);
-
-	public static void main(String[] args) {
-		boolean running = true;
-		System.out.println("Welcome to the dice rolling game! (1-6 is low, 7 is a loss, 8-12 is high.");
-		System.out.println("You have " + points + " points.");
-		while (running) {
-			riskPoints();
-		}
-	}
+class Die {
+	private final Random rand = new Random();
 	
-	public static void riskPoints() {
-		boolean running = true;
-		int choice;
-		while(running) {
-			System.out.println("How many points would you like to risk? (-1 to quit): ");
-			choice = in.nextInt();
-			if (choice == -1) {
-				System.out.println("Thank you for playing!");
-				System.out.println("You finished with " + points + " points.");
-				running = false;
-			}
-			else if(choice > -1 || choice > points) {
-				running = false;
-				callRoll(choice);
-			}
-			else {
-				System.out.println("I'm sorry but that wasn't an acceptable amount. Please try again: ");
-				choice = in.nextInt();
-			}
-		}
-	}
-	public static void callRoll(int riskedPoints) {
-		System.out.println("Make a call (0 for low, 1 for high): ");
-		int call = in.nextInt();
-		Random rand = new Random();
-		int roll = (rand.nextInt(6) + 1) + (rand.nextInt(6)+1);
-		
-		// Winning or losing 
-		if (roll == 7) { // loss
-			points -= riskedPoints;
-			System.out.println("You rolled: 7");
-			System.out.println("You now have " + points + " points.");
-		}
-		else if (call == 0 && roll < 7) { // Bet low - roll low (win)
-			points += riskedPoints;
-			System.out.println("You rolled: " + roll);
-			System.out.println("You now have " + points + " points.");
-		}
-		else if (call == 0 && roll > 7) { // bet low - roll high (loss)
-			points -= riskedPoints;
-			System.out.println("You rolled: " + roll);
-			System.out.println("You now have " + points + " points.");
-		}
-		else if (call == 1 && roll < 7) { // Bet high - roll low (loss)
-			points -= riskedPoints;
-			System.out.println("You rolled: " + roll);
-			System.out.println("You now have " + points + " points.");
-		}
-		else if (call == 1 && roll > 7) { // Bet high - roll high (win)
-			points += riskedPoints;
-			System.out.println("You rolled: " + roll);
-			System.out.println("You now have " + points + " points.");
-		}
-		else {
-			System.out.println("That wasnt a valid option. Please try again.");
-		}
-			
-			
-	}
-	public void temp() {
-		
+	public int roll() {
+		return rand.nextInt(6)+1;
 	}
 }
 
-// --- console output --- //
-//Welcome to the dice rolling game! (1-6 is low, 7 is a loss, 8-12 is high.
-//You have 1000 points.
-//How many points would you like to risk? (-1 to quit): 
-//200
-//Make a call (0 for low, 1 for high): 
-//1
-//You rolled: 7
-//You now have 800 points.
-//How many points would you like to risk? (-1 to quit): 
-//400
-//Make a call (0 for low, 1 for high): 
-//2
-//That wasnt a valid option. Please try again.
-//How many points would you like to risk? (-1 to quit): 
-//200
-//Make a call (0 for low, 1 for high): 
-//1
-//You rolled: 2
-//You now have 600 points.
-//How many points would you like to risk? (-1 to quit): 
-//-1
-//Thank you for playing!
-//You finished with 600 points.
-//How many points would you like to risk? (-1 to quit): 
+class Player {
+	private int points;
+	public Player(int startingPoints) { this.points = startingPoints; }
+	public int getPoints() { return points; }
+	public void updatePoints(int amount) { this.points += amount; }
+	public boolean canAfford(int amount) { return (amount > 0 && amount <= points); }
+}
 
+//Running game
+public class exercise4_diceRollGame {
+	public static void main(String[] args) {
+		DiceGame game = new DiceGame(1000);
+		game.start();
+		System.out.print("Thank you for playing!");
+	}
+}
+
+class DiceGame {
+	// Establishing new game
+	private Die d1 = new Die();
+	private Die d2 = new Die();
+	private Player player;
+	private Scanner in = new Scanner(System.in);
+	public DiceGame(int startingPoints) { this.player = new Player(startingPoints); }
+	
+	// Start game
+	public void start() {
+		System.out.println("Welcome to the dice game!");
+		System.out.println("You have " + player.getPoints() + " points.");
+		
+		// Game loop
+		while (player.getPoints() > 0) {
+			playRound();
+			System.out.print("Play again? (y/n): ");
+			if (in.next().toLowerCase().equals("n")) break;
+		}	
+	}
+	
+	public void playRound() {
+		// Betting
+		System.out.print("Risk: ");
+		int bet = in.nextInt();
+		if (!player.canAfford(bet)) { 
+			System.out.println("You do not have enough money for that bet.");
+			return;	
+		}
+		
+		// Calling roll
+		System.out.print("0 for Low, 1 for High: ");
+		int call = in.nextInt();
+		
+		// Rolling dice
+		int roll = d1.roll() + d2.roll();
+		System.out.println("Rolled: " + roll);
+		
+		// Player Won
+		if ((roll < 7 && call == 0) || (roll > 7 && call == 1)) {
+			player.updatePoints(bet);
+			System.out.println("You Win " + bet + " points!");
+		}else { // Player Lost
+			player.updatePoints(-bet);
+			System.out.println("You lose " + bet + " points!");
+		}
+		
+		System.out.println("You have " + player.getPoints() + " points left.");
+	}
+}
+	
+/*
+
+/// --- console output --- ///
+Welcome to the dice game!
+You have 1000 points.
+Risk: 1001
+You do not have enough money for that bet.
+Play again? (y/n): y
+Risk: 250
+0 for Low, 1 for High: 0
+Rolled: 8
+You lose 250 points!
+You have 750 points left.
+Play again? (y/n): y
+Risk: 500
+0 for Low, 1 for High: 1
+Rolled: 5
+You lose 500 points!
+You have 250 points left.
+Play again? (y/n): n
+Thank you for playing!
+
+*/
 
 

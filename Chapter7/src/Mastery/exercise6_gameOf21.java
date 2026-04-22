@@ -1,287 +1,275 @@
+/*
+
+Program: exercise6_gameOf21.java          Last Date of this Revision: April 22, 2026
+
+Purpose: Game of 21
+
+Author: Leif Martin, 
+School: CHHS
+Course: Computer Programming 20-1
+
+*/
+
 package Mastery;
 
 import java.util.Scanner;
-
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class exercise6_gameOf21 {
-	private static int dealerAce = 0;
-	private static int playerAce = 0;
-	private static int bet;
-	private static int money = 1000;
-	private static List<String> playerCards = new ArrayList<>();
-	private static List<String> dealerCards = new ArrayList<>();
-	static private List<String> deck = new ArrayList<>();
-	static Scanner in = new Scanner(System.in);
-
+enum Rank {
+	// All possible card ranks
+	ACE(11, "Ace"),
+	TWO(2, "Two"), 
+	THREE(3, "Three"),
+	FOUR(4, "Four"), 
+	FIVE(5, "Five"),
+	SIX(6, "Six"), 
+	SEVEN(7, "Seven"),
+	EIGHT(8, "Eight"), 
+	NINE(9, "Nine"), 
+	TEN(10, "Ten"),
+	JACK(10, "Jack"),
+	QUEEN(10, "Queen"),
+	KING(10, "King");
 	
-	public static void main(String[] args) { // Main Code and Game
-		boolean running = true;
-		shuffleDeck();
-		String choice = null;
-		System.out.println("+============================+");
-		System.out.println("| Welcome to the game of 21. |");
-		System.out.println("+============================+\n");
-		while (running && money > 0) {
-			System.out.println("You have " + money + " dollars.");
-			deal();
-			System.out.println("Would you like to play again?.(y,n)");
-			choice = in.next();
-			if (choice.equals("y")) {
-				System.out.println("You have " + money + " dollars.");
-				deal();
-			}
-			else if (money > 0){
-				System.out.println("You finished with " + money + " dollars");
-			}
-		}
-		if (money == 0) {
-			System.out.println("Thank you for playing!");
-		}
+	private final int value;
+	private final String display;
+	
+	// Establish cards value and rank
+	Rank(int value, String display){
+		this.value = value;
+		this.display = display;
 	}
 	
-	public static void shuffleDeck() { // reseting the deck for game play
-		deck.clear(); // Reset	
-		for(int i = 0; i < 4; i ++) { // Fill the deck
-			deck.add("Ace"); // Ace
-			deck.add("Two");	deck.add("Three");
-			deck.add("Four");	deck.add("Five");
-			deck.add("Six");	deck.add("Seven");
-			deck.add("Eight");	deck.add("Nine");
-			deck.add("Ten"); // Ten
-			deck.add("Jack"); // Jack
-			deck.add("Queen"); // Queen
-			deck.add("King"); // King
-		}	
-		Collections.shuffle(deck);	// Shuffle the deck
-	}
-	public static int getValue(String rank) { // Checking the Values of ranks for cards
-		int value;
-		switch (rank) {
-		case "Ace": // Ace
-			value = 11;
-			break;
-		case"Two": // Two
-			value = 2;
-			break;
-		case "Three": // Three
-			value = 3;
-			break;
-		case "Four": // Four
-			value = 4;
-			break;
-		case "Five": // Five
-			value = 5;
-			break;
-		case "Six": // Six
-			value = 6;
-			break;
-		case "Seven": // Seven
-			value = 7;
-			break;
-		case "Eight": // Eight
-			value = 8;
-			break;
-		case "Nine": // Nine
-			value = 9;
-			break;
-		case "Ten": // Ten
-			value = 10;
-			break;		
-		case "Jack": // Jack
-			value = 10;
-			break;	
-		case "Queen": // Queen
-			value = 10;
-			break;	
-		case "King": // King
-			value = 10;
-			break;	
-		default: // Acelow
-			value = -10;				
-		}
-		return value;
-	}
-	public static void deal() { // Dealing and betting
-		boolean running = true;	
-		playerCards.clear();
-		dealerCards.clear();
-		playerAce = 0;
-		dealerAce = 0;
-		bet = 0;
-		System.out.println("How much would you like to bet?: ");
-		bet = in.nextInt();
-		while (running) {
-			if (bet <= money) {
-				running = false;
-			}
-			else {
-				System.out.println("That was an invalid bet, please try again.");
-				System.out.println("How much would you like to bet?: ");
-				bet = in.nextInt();
-			}
-		}
-		if(deck.size() <= 18) { // Checking if they should reshuffle
-			shuffleDeck();		
-		}
-		System.out.println("The dealer has a " + draw("dealer") + ".(" + getValue(dealerCards.get(0)) + ")");
-		System.out.println("You draw a " + draw("player") + " and a " + draw("player") + ".(" + getTotalFor("player") + ")" );
-		hitOrStand();
-		
-	}
-	public static void hitOrStand() {
-		// initialize variables
-		boolean running = true;	
-		String choice;
-		String draw = null;
+	// methods to get value of card and to display card rank
+	public int getValue() { return value; }
+	public String getDisplay() { return display; }
+}
 
-		while (running && getTotalFor("player") <= 21) { // Hit, stand and double running
-			System.out.println("Would you like to (h)it, (s)tand, or (d)ouble?");
-			choice = in.next();
-			while (!(choice.equals("h") || choice.equals("s") || choice.equals("d"))) { // input loop
-				System.out.println("That wasn't an option.(h,s,d)?");
-				System.out.println("Would you like to (h)it, (s)tand, or (d)ouble?");		
-				choice = in.next();
+// Player (keeps track of money)
+class TotalMoney {
+	private int money;
+	public TotalMoney(int startingMoney) { this.money = startingMoney; }
+	public int getMoney() { return this.money; }
+	public void updateMoney(int amount) { this.money += amount; }
+}
+
+class Card {
+	private final Rank rank;
+	public Card(Rank rank) { this.rank = rank; }
+	public int getValue() { return rank.getValue(); }
+	public String toString() { return rank.getDisplay(); }
+}
+
+class Deck {
+	private List<Card> cards = new ArrayList<>(); 
+	
+	public Deck() {
+		for (int i = 0; i < 1; i++) {
+			for (Rank r : Rank.values()) {
+				cards.add(new Card(r));
 			}
-			checkAce("player");
-		
-			if (running && getTotalFor("player")  <= 21) {			
-				if(choice.equals("h") || choice.equals("d")) { // Hit	or double
-					if (choice == "d"){ // double
-						bet *= 2;
-					}
-					draw = draw("player");
-					checkAce("player");
-					System.out.println("You draw a " + draw + " and now have (" + getTotalFor("player") + ")");	
-					if (getTotalFor("player") > 21) {
-						money -= bet;
-						System.out.println("You have busted, and lost " + bet + " dollars");
-						running = false;
-					}	
-				}
-				else if(choice.equals("s")) { // Stand
-					System.out.println("You have stood with (" + getTotalFor("player") + ")"); 
-					running = false;
-				}	
-			}
-		}
-		if (getTotalFor("player") <= 21){
-			dealerDraw();
-		}
-	}	
-	public static String draw(String drawFor) {
-		String card = null;
-		if (drawFor.equals("player")) { // Draw for the Player
-			card = deck.get(0);
-			playerCards.add(deck.get(0));
-			deck.remove(0);	
-			if (card.equals("Ace")) {
-				playerAce += 1;
-			}
-			checkAce("player");
-		}
-		else if(drawFor.equals("dealer")) { // Draw for the dealer
-			card = deck.get(0);
-			dealerCards.add(deck.get(0));
-			deck.remove(0);		
-			if (card.equals("Ace")) {
-				dealerAce += 1;
-			}
-			checkAce("dealer");
-		}
-		return card;
-	}
-	public static void dealerDraw() {
-		String card = draw("dealer");
-		boolean running = true;
-		checkAce("dealer");
-		System.out.println("The dealer draws a " + card + ". their total is now (" + getTotalFor("dealer") + ")");
-		while(getTotalFor("dealer") < 21 && running && getTotalFor("dealer") < 17) {
-			checkAce("dealer");
-			if(getTotalFor("dealer") > 21) {
-				running = false;
-			}
-			else if (getTotalFor("dealer") >= 17) {
-			System.out.println("The dealer stood with (" + getTotalFor("dealer") + ").");
-			running = false;
-			}
-			else {
-				draw("dealer"); 
-				checkAce("dealer");
-				System.out.println("The dealer draws a " + card + ". their total is now (" + getTotalFor("dealer") + ")");
-			}
-		}
-		if (getTotalFor("dealer") > 21) { // Dealer busts
-			money += bet;
-			System.out.println("Dealer busted! You won " + bet + " dollars and now have " + money);		
-		}
-		else if (getTotalFor("dealer") == getTotalFor("player")) {// push
-			bet /= 2;
-			money += bet;
-			System.out.println("You both have the same totals! You pushed and gained " + bet + " dollars and now have " + money);	
-		}
-		else if (getTotalFor("dealer") > getTotalFor("player")) { // dealer wins
-			money -= bet;
-			System.out.println("Dealer Won! You lost " + bet + " dollars and now have " + money);
-		}
-		else if (getTotalFor("dealer") < getTotalFor("player")) { // player wins
-			money += bet;
-			System.out.println("Dealer Lost! You won " + bet + " dollars and now have " + money);
 		}
 	}
-	public static int getTotalFor(String totalFor) {
+	
+	public void shuffle() { Collections.shuffle(cards); }
+	
+	// Draw a new card
+	public Card draw() { 
+		return cards.remove(0); 
+		}
+	
+//	public int size() { return cards.size(); }
+}
+
+// Defining the hand class
+class Hand {
+	private List<Card> cards = new ArrayList<>();
+	
+	// Drawing card into hand
+	public String drawCard(Card card) {
+		cards.add(card);
+		return card.toString();
+	}
+	
+	// Get the value of the hand
+	public int getTotal() {
 		int total = 0;
-		if (totalFor.equals("player")) {
-			for (int i = 0; i < playerCards.size(); i++) {
-				total += getValue(playerCards.get(i));
-			}
+		int aces = 0;
+		for (Card c : cards) {
+			total += c.getValue();
+			if (c.toString().equals("Ace")) aces++;
 		}
-		else if (totalFor.equals("dealer")) {
-			for (int i = 0; i < dealerCards.size(); i++) {
-				total += getValue(dealerCards.get(i));
-			}
+		// Accounting for ace
+		while (total > 21 && aces > 0) {
+			total -= 10;
+			aces--;
 		}
 		return total;
 	}
-	public static void checkAce(String checkFor) {
-		if(checkFor.equals("player")) {
-			if (getTotalFor("player") > 21 && playerAce >= 1) { // Had an ace				
-					playerAce -= 1;
-					playerCards.add("aceLow");				
-			}
-		}
-		else if (checkFor.equals("dealer")){
-			if(getTotalFor("dealer") > 21 && dealerAce >= 1) { // Had an ace
-				dealerAce -= 1;
-				dealerCards.add("aceLow");
-			}
-		}
+	// Display hand as String
+	public String toString() {
+//		for(Card c : cards) {
+//			 System.out.print("");
+//		}
+		return cards.toString() + " (" + getTotal() + ")";
+	}
+	
+//	// Reset hand
+//	public void clear() { cards.clear(); }
+}
+
+public class exercise6_gameOf21 {
+	
+	public static void main(String[] args) {
+	
+		GameOf21 game = new GameOf21();
+		game.startGame();
 	}
 }
-//// --- console output --- //
-//+============================+
-//| Welcome to the game of 21. |
-//+============================+
-//
-//You have 1000 dollars.
-//How much would you like to bet?: 
-//5000
-//That was an invalid bet, please try again.
-//How much would you like to bet?: 
-//500
-//The dealer has a Ten.(10)
-//You draw a Eight and a Jack.(18)
-//Would you like to (h)it, (s)tand, or (d)ouble?
-//s
-//You have stood with (18)
-//The dealer draws a Seven. their total is now (17)
-//Dealer Lost! You won 500 dollars and now have 1500
-//Would you like to play again?.(y,n)
-//n
-//Thank you for playing!
-//You finished with 1500 dollars
-//How much would you like to bet?: 
+
+class GameOf21 {
+		
+	public static TotalMoney player = new TotalMoney(1000);
+
+	// Initial game method
+	public void startGame() {
+		Scanner in = new Scanner(System.in);
+		
+		// Display start screen
+		System.out.println("Welcome to the game of 21!");
+		System.out.println("==========================");
+		
+		// Game running loop
+		while(true) {
+			playRound();
+			
+			// Play again?
+			System.out.print("Play again? (y/n): ");
+			String input = in.next();
+			if((input).equals("n") || player.getMoney() == 0) break;
+		}
+		// Quit game
+		System.out.println("You finished with " + player.getMoney() + " dollars.");
+		System.out.println("Thank you for playing!");
+	}
+	
+	private static void playRound() {
+		// Initializing
+		Deck deck = new Deck();
+		deck.shuffle();
+		Hand pHand = new Hand();
+		Hand dHand = new Hand();
+		int bet;
+		Scanner in = new Scanner(System.in);
+		
+		System.out.println("You have " + player.getMoney() + " dollars.");
+		
+		// Betting
+		while(true) {
+			System.out.print("Bet: ");
+			bet = in.nextInt();
+			if(bet > 0 && bet <= player.getMoney()) break;
+			System.out.println("I'm sorry, that was not a valid bet.");
+		}
+		
+		// Dealing initial cards
+		dHand.drawCard(deck.draw());
+		pHand.drawCard(deck.draw());
+		pHand.drawCard(deck.draw());
+		
+		// Display hands
+		System.out.println("Dealer shows: " + dHand.toString());
+		System.out.println("Your hand: " + pHand.toString());	
+	
+		// Player's turn
+		while (pHand.getTotal() <= 21) {
+			System.out.print("(h)it, (d)ouble, or (s)tand?: ");
+			String choice = in.next().toLowerCase();
+			if(!choice.equals("h")) {
+				if (choice.equals("d") && player.getMoney() > (bet*2)) { // Double
+					pHand.drawCard(deck.draw());
+					bet *= 2;
+				}
+				// Exit players action
+				break;	
+			}
+		
+			pHand.drawCard(deck.draw());
+			System.out.println("Hand: " + pHand.toString());
+		}
+		
+		// Dealer's turn
+		while (dHand.getTotal() < 17 && pHand.getTotal() <= 21) {
+			dHand.drawCard(deck.draw());
+		}
+		System.out.println("Dealers final: " + dHand);
+		
+		// Round over
+		checkWinner(pHand, dHand, bet);
+	
+	}
+	
+	// Seeing who if someone won
+	private static void checkWinner(Hand p, Hand d, int bet) {
+		int pT = p.getTotal();
+		int dT = d.getTotal();
+		
+		// Checking the win condition
+		if (pT > 21) { // Player busts
+			player.updateMoney(-bet);
+			System.out.println("Bust! Lost: " + bet);
+		}
+		else if (dT > 21) { // dealer busts
+			player.updateMoney(bet);
+			System.out.println("Dealer busts! Gained: " + bet);
+		}
+		else if (pT == dT) { // Push
+			System.out.println("Push (Tie).");
+		}
+		else if (pT > dT) { // Player wins
+			player.updateMoney(bet);
+			System.out.println("You Won: " + bet);
+		}
+		else { // The player lost
+			player.updateMoney(-bet);
+			System.out.println("Dealer Wins. Lost: " + bet);
+		}
+
+	}
+}
 
 
+
+///////////////////////////////////////////////////////////
+
+/*
+ 
+/// --- console output --- ///
+
+Welcome to the game of 21!
+==========================
+You have 1000 dollars.
+Bet: 500
+Dealer shows: [Ten] (10)
+Your hand: [Seven, Two] (9)
+(h)it, (d)ouble, or (s)tand?: h
+Hand: [Seven, Two, Ace] (20)
+(h)it, (d)ouble, or (s)tand?: s
+Dealers final: [Ten, Six, King] (26)
+Dealer busts! Gained: 500
+Play again? (y/n): y
+You have 1500 dollars.
+Bet: 750
+Dealer shows: [Five] (5)
+Your hand: [Eight, Four] (12)
+(h)it, (d)ouble, or (s)tand?: h
+Hand: [Eight, Four, Queen] (22)
+Dealers final: [Five] (5)
+Bust! Lost: 750
+Play again? (y/n): n
+You finished with 750 dollars.
+Thank you for playing!
+
+*/
